@@ -1,0 +1,91 @@
+
+### Crear usuario
+POST http://localhost:8080/usuarios/crear
+Content-Type: application/json
+
+{
+  "nombre": "Jaime Novilo",
+  "email": "jaime.novillo@example.com",
+  "pass": "12345",
+  "descripcion": "Desarrollador backend",
+  "icono": ""
+}
+
+### Borrar usuario
+DELETE http://localhost:8080/usuarios/1
+
+### Modificar usuario
+PATCH http://localhost:8080/usuarios/1
+Content-Type: application/json
+
+{
+  "nombre": "Jaime Novillo",
+  "email": "jaime.novillo@example.com",
+  "pass": "67890",
+  "descripcion": "Desarrollador fullstack",
+  "icono": "https://example.com/new-icon.png"
+}
+
+### Obtener todos los usuarios
+
+GET http://localhost:8080/usuarios
+
+
+
+
+### Pruebas usuarios y publicaciones
+
+### Crear usuario
+POST http://localhost:8080/usuarios/crear
+Content-Type: application/json
+
+{
+  "nombre": "Ana Perez",
+  "email": "ana.perez@example.com",
+  "pass": "password123",
+  "descripcion": "Desarrolladora frontend",
+  "icono": ""
+}
+
+
+
+
+### Prueba securtity
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+  "email": "jaime.novillo@example.com",
+  "pass": "12345"
+}
+
+### Si
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+"email": "a@a.es",
+"pass": "a@a.es"
+}
+
+### Obtener cursos por usuario
+GET http://localhost:8080/cursos/usuario/3
+Content-Type: application/json
+
+### Crear curso 1 para el usuario 3
+POST http://localhost:8080/cursos/crear?usuarioId=3
+Content-Type: application/json
+
+{
+  "titulo": "Curso de Java",
+  "descripcion": "Aprende los fundamentos de Java"
+}
+
+### Crear curso 2 para el usuario 3
+POST http://localhost:8080/cursos/crear?usuarioId=3
+Content-Type: application/json
+
+{
+  "titulo": "Curso de Spring Boot",
+  "descripcion": "Desarrollo de aplicaciones con Spring Boot"
+}

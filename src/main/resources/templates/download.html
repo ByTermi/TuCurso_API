@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Descargar Imagen</title>
+</head>
+<body>
+<h1>Descargar Imagen</h1>
+
+<!-- Formulario para buscar la imagen -->
+<form th:action="@{/download}" method="get">
+  <label for="imageId">Ingresa el ID de la imagen:</label>
+  <input type="text" id="imageId" name="imageId" required />
+  <button type="submit">Descargar</button>
+</form>
+
+<div th:if="${image}">
+  <h2 th:text="'Imagen descargada: ' + ${image.name}"></h2>
+  <!-- El enlace descargará la imagen -->
+  <a th:href="@{/download/{id}(id=${image.id})}" th:text="'Descargar ' + ${image.name}">Descargar Imagen</a>
+</div>
+</body>
+</html>

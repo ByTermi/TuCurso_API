@@ -1,0 +1,18 @@
+POST http://localhost:8080/usuarios/crear
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "email": "juan@example.com",
+  "pass": "password123"
+}
+
+### Login
+
+POST http://localhost:8080/usuarios/login
+Content-Type: application/json
+
+{
+"email": "juan@example.com",
+"pass": "password123"
+}

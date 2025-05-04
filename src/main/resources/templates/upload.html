@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Subir Imagen</title>
+</head>
+<body>
+<h1>Subir Imagen</h1>
+
+<!-- Formulario para subir imagen -->
+<form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+  <label for="file">Selecciona una imagen para subir:</label>
+  <input type="file" id="file" name="file" accept="image/*" required/>
+  <button type="submit">Subir</button>
+</form>
+
+<!-- Mensaje de éxito o error -->
+<div th:if="${message}">
+  <p th:text="${message}"></p>
+</div>
+</body>
+</html>
