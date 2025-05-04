@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>es.social</groupId>
-    <artifactId>Proyecto_Grupal</artifactId>
+    <artifactId>TuCurso</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>TuCurso</name>
     <description>API para el proyecto TuCurso, capaz de almacenar los cursos de la gente</description>
