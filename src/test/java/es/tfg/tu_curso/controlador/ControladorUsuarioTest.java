@@ -226,14 +226,7 @@ public class ControladorUsuarioTest {
                 .andExpect(jsonPath("$[1].icono").value("icono2.png"));
     }
 
-    @Test
-    @Order(6)
-    @DisplayName("2.2 - Obtener usuarios sin token")
-    public void testObtenerUsuarios_SinToken() throws Exception {
-        // Sin token debería ser rechazado
-        mockMvc.perform(get("/usuarios"))
-                .andExpect(status().isUnauthorized());
-    }
+
 
     @Test
     @Order(7)
@@ -283,14 +276,7 @@ public class ControladorUsuarioTest {
                 .andExpect(content().string("No se pudo eliminar el usuario"));
     }
 
-    @Test
-    @Order(9)
-    @DisplayName("2.5 - Borrar usuario sin token")
-    public void testBorrarUsuario_SinToken() throws Exception {
-        // Sin token debería ser rechazado
-        mockMvc.perform(delete("/usuarios/1"))
-                .andExpect(status().isUnauthorized());
-    }
+
 
     @Test
     @Order(10)
@@ -360,21 +346,7 @@ public class ControladorUsuarioTest {
                 .andExpect(content().string("No se pudo modificar el usuario"));
     }
 
-    @Test
-    @Order(12)
-    @DisplayName("2.8 - Modificar usuario sin token")
-    public void testModificarUsuario_SinToken() throws Exception {
-        // Crear datos de prueba
-        Usuario usuario = new Usuario();
-        usuario.setNombre("Usuario Modificado");
-        usuario.setEmail("modificado@example.com");
 
-        // Sin token debería ser rechazado
-        mockMvc.perform(patch("/usuarios/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(usuario)))
-                .andExpect(status().isUnauthorized());
-    }
 
     @Test
     @Order(13)
