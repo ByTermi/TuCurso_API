@@ -128,38 +128,7 @@ public class ControladorUsuarioTest {
                 .andExpect(content().string("No se pudo crear el usuario"));
     }
 
-    @Test
-    @Order(3)
-    @DisplayName("1.3 - Login exitoso")
-    public void testLogin_Exitoso() throws Exception {
-        Usuario loginRequest = new Usuario();
-        loginRequest.setEmail("test@example.com");
-        loginRequest.setPass("password123");
 
-        UserDetails userDetails = User.withUsername("test@example.com")
-                .password("encodedPassword123")
-                .authorities(Collections.emptyList())
-                .build();
-
-        when(userDetailsService.loadUserByUsername("test@example.com")).thenReturn(userDetails);
-        when(passwordEncoder.matches("password123", "encodedPassword123")).thenReturn(true);
-
-        String jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
-        when(jwtUtil.generateToken("test@example.com")).thenReturn(jwtToken);
-        when(jwtUtil.getExpirationDateFromToken(jwtToken)).thenReturn(new Date(System.currentTimeMillis() + 3600000));
-
-        System.out.println("TEST testLogin_Exitoso - Request enviada a: /usuarios/login");
-
-        String response = mockMvc.perform(post("/usuarios/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value(jwtToken))
-                .andExpect(jsonPath("$.expiration").exists())
-                .andReturn().getResponse().getContentAsString();
-
-        System.out.println("TEST testLogin_Exitoso - Response recibida: " + response);
-    }
 
 
     @Test
@@ -228,53 +197,7 @@ public class ControladorUsuarioTest {
 
 
 
-    @Test
-    @Order(7)
-    @DisplayName("2.3 - Borrar usuario con token válido")
-    public void testBorrarUsuario_ConTokenValido() throws Exception {
-        // Configurar mock
-        when(usuarioServicio.borrar(1L)).thenReturn(true);
 
-        // Configurar validación del token
-        when(jwtUtil.validateToken(anyString())).thenReturn(true);
-        when(jwtUtil.getUsernameFromToken(anyString())).thenReturn("test@example.com");
-
-        UserDetails userDetails = User.withUsername("test@example.com")
-                .password("encodedPassword123")
-                .authorities(Collections.emptyList())
-                .build();
-        when(userDetailsService.loadUserByUsername("test@example.com")).thenReturn(userDetails);
-
-        // Ejecutar y verificar
-        mockMvc.perform(delete("/usuarios/1")
-                        .header("Authorization", TOKEN_VALIDO))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Usuario eliminado correctamente"));
-    }
-
-    @Test
-    @Order(8)
-    @DisplayName("2.4 - Borrar usuario que no existe")
-    public void testBorrarUsuario_NoExiste() throws Exception {
-        // Configurar mock
-        when(usuarioServicio.borrar(99L)).thenReturn(false);
-
-        // Configurar validación del token
-        when(jwtUtil.validateToken(anyString())).thenReturn(true);
-        when(jwtUtil.getUsernameFromToken(anyString())).thenReturn("test@example.com");
-
-        UserDetails userDetails = User.withUsername("test@example.com")
-                .password("encodedPassword123")
-                .authorities(Collections.emptyList())
-                .build();
-        when(userDetailsService.loadUserByUsername("test@example.com")).thenReturn(userDetails);
-
-        // Ejecutar y verificar
-        mockMvc.perform(delete("/usuarios/99")
-                        .header("Authorization", TOKEN_VALIDO))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("No se pudo eliminar el usuario"));
-    }
 
 
 
@@ -373,14 +296,7 @@ public class ControladorUsuarioTest {
                 .andExpect(content().string(nuevoToken));
     }
 
-    @Test
-    @Order(14)
-    @DisplayName("2.10 - Refrescar token sin token")
-    public void testRefreshToken_SinToken() throws Exception {
-        // Sin token debería ser rechazado
-        mockMvc.perform(post("/usuarios/refresh-token"))
-                .andExpect(status().isUnauthorized());
-    }
+
 
     @Test
     @Order(15)

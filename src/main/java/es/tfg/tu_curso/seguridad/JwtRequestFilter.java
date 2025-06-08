@@ -17,71 +17,105 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filtro para procesar y validar tokens JWT en las solicitudes entrantes.
+ * Este filtro intercepta cada solicitud HTTP y verifica si contiene un token JWT válido
+ * en el encabezado de autorización. Si el token es válido, establece la autenticación
+ * del usuario en el contexto de seguridad de Spring para permitir el acceso a los recursos protegidos.
+ */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.secret}") // Inyecta la clave secreta desde application.properties
+    /**
+     * Clave secreta utilizada para validar la firma de los tokens JWT.
+     * Se inyecta desde el archivo de propiedades de la aplicación.
+     */
+    @Value("${jwt.secret}")
     private String secret;
 
+    /**
+     * Servicio utilizado para cargar los detalles del usuario basándose en su nombre de usuario.
+     */
     private final UserDetailsService userDetailsService;
 
-    // Constructor que recibe el servicio UserDetailsService
+    /**
+     * Constructor que inicializa el filtro con el servicio de detalles de usuario necesario.
+     *
+     * @param userDetailsService Servicio para cargar los detalles del usuario
+     */
     public JwtRequestFilter(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Método principal del filtro que procesa cada solicitud HTTP.
+     * Extrae y valida el token JWT del encabezado de autorización y establece la autenticación
+     * en el contexto de seguridad si el token es válido.
+     *
+     * @param request La solicitud HTTP entrante
+     * @param response La respuesta HTTP saliente
+     * @param chain La cadena de filtros para continuar el procesamiento
+     * @throws ServletException Si ocurre un error durante el procesamiento de la solicitud
+     * @throws IOException Si ocurre un error de entrada/salida
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // Obtiene el encabezado "Authorization" de la solicitud HTTP
         final String authorizationHeader = request.getHeader("Authorization");
 
-        String username = null; // Variable para almacenar el nombre de usuario extraído del token
-        String jwt = null;      // Variable para almacenar el token JWT
+        // Log para debugging
+        System.out.println("=== JWT Filter Debug ===");
+        System.out.println("URL solicitada: " + request.getRequestURL());
+        System.out.println("Authorization Header: " + authorizationHeader);
 
-        // Verifica si el encabezado "Authorization" existe y comienza con "Bearer "
+        String username = null;
+        String jwt = null;
+
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            // Extrae el token JWT eliminando el prefijo "Bearer "
             jwt = authorizationHeader.substring(7);
-
-            // Parsea el token JWT para extraer los claims (información contenida en el token)
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secret) // Usa la clave secreta para validar el token
-                    .parseClaimsJws(jwt)   // Parsea el token
-                    .getBody();            // Obtiene los claims del token
-
-            // Extrae el nombre de usuario (subject) del token
-            username = claims.getSubject();
+            System.out.println("Token JWT extraído: " + jwt);
+            try {
+                Claims claims = Jwts.parser()
+                        .setSigningKey(secret)
+                        .parseClaimsJws(jwt)
+                        .getBody();
+                username = claims.getSubject();
+                System.out.println("Username extraído del token: " + username);
+            } catch (Exception e) {
+                System.out.println("Error al procesar el token JWT: " + e.getMessage());
+                logger.error("Error al procesar el token JWT: " + e.getMessage());
+            }
+        } else {
+            System.out.println("No se encontró token JWT válido en el header");
         }
 
-        // Si se encontró un nombre de usuario y no hay una autenticación previa en el contexto de seguridad...
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Carga los detalles del usuario (UserDetails) usando el nombre de usuario
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            System.out.println("Autoridades del usuario: " + userDetails.getAuthorities());
 
-            // Valida el token JWT comparando el nombre de usuario del token con el del UserDetails
-            if (Jwts.parser()
-                    .setSigningKey(secret) // Usa la clave secreta para validar el token
-                    .parseClaimsJws(jwt)    // Parsea el token
-                    .getBody()              // Obtiene los claims del token
-                    .getSubject()           // Obtiene el nombre de usuario del token
-                    .equals(userDetails.getUsername())) { // Compara con el nombre de usuario de UserDetails
+            try {
+                Claims claims = Jwts.parser()
+                        .setSigningKey(secret)
+                        .parseClaimsJws(jwt)
+                        .getBody();
 
-                // Crea un objeto de autenticación (UsernamePasswordAuthenticationToken) con los detalles del usuario
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                if (claims.getSubject().equals(userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
 
-                // Establece detalles adicionales de la autenticación (como la dirección IP del cliente)
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Establece la autenticación en el contexto de seguridad de Spring
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("Autenticación establecida correctamente");
+                }
+            } catch (Exception e) {
+                System.out.println("Error validando el token JWT: " + e.getMessage());
+                logger.error("Error validando el token JWT: " + e.getMessage());
             }
         }
+        System.out.println("============================");
 
-        // Continúa con la cadena de filtros para procesar la solicitud
         chain.doFilter(request, response);
     }
 }

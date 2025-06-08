@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Gestión de Usuarios</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <button class="nav-link btn btn-link" onclick="irADashboard()">Dashboard</button>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" onclick="logout()">Cerrar Sesión</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Lista de Usuarios</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre de Usuario</th>
+                                <th>Descripcion</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${usuarios}">
+                                <td th:text="${usuario.getId()}">1</td>
+                                <td th:text="${usuario.getNombre()}">usuario1</td>
+                                <td th:text="${usuario.getDescripcion()}">email@example.com</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-warning btn-sm"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#modalPassword' + ${usuario.getId()}">
+                                            Cambiar Contraseña
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#modalEliminar' + ${usuario.getId()}">
+                                            Eliminar
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Cambiar Contraseña -->
+                                    <div class="modal fade" th:id="'modalPassword' + ${usuario.getId()}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form th:onsubmit="'event.preventDefault(); cambiarPassword(' + ${usuario.getId()} + ')'">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Cambiar Contraseña</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label for="password" class="form-label">Nueva Contraseña</label>
+                                                            <input type="password" class="form-control nuevaPassword" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Guardar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal Eliminar -->
+                                    <div class="modal fade" th:id="'modalEliminar' + ${usuario.getId()}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form th:onsubmit="'event.preventDefault(); eliminarUsuario(' + ${usuario.getId()} + ')'">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>¿Está seguro de que desea eliminar al usuario
+                                                           <span th:text="${usuario.getNombre()}"></span>?</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return;
+            }
+        });
+
+        function irADashboard() {
+            const token = localStorage.getItem('token');
+            fetch('/admin/dashboard', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Error al acceder al dashboard');
+            })
+            .then(htmlContent => {
+                document.open();
+                document.write(htmlContent);
+                document.close();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al acceder al dashboard');
+            });
+        }
+
+        function cambiarPassword(userId) {
+            const token = localStorage.getItem('token');
+            const modal = document.getElementById('modalPassword' + userId);
+            const passwordInput = modal.querySelector('.nuevaPassword');
+            const nuevaPassword = passwordInput.value;
+
+            fetch(`/admin/usuarios/${userId}/cambiar-password`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nuevaContrasena: nuevaPassword })
+            })
+            .then(response => {
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(modal).hide();
+                    recargarPagina();
+                } else {
+                    throw new Error('Error al cambiar la contraseña');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cambiar la contraseña');
+            });
+        }
+
+        function eliminarUsuario(userId) {
+            const token = localStorage.getItem('token');
+            const modal = document.getElementById('modalEliminar' + userId);
+
+            fetch(`/admin/usuarios/${userId}/eliminar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.mensaje) {
+                    // Éxito
+                    bootstrap.Modal.getInstance(modal).hide();
+                    recargarPagina();
+                } else if (data.error) {
+                    // Error del servidor
+                    throw new Error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || 'Error al eliminar el usuario');
+            });
+        }
+
+        function recargarPagina() {
+            const token = localStorage.getItem('token');
+            fetch('/admin/usuarios', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Error al recargar la página');
+            })
+            .then(htmlContent => {
+                document.open();
+                document.write(htmlContent);
+                document.close();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al recargar la página');
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/admin/login';
+        }
+    </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ public class ProyectoGrupalApplication {
     public static void main(String[] args) {
         var context = SpringApplication.run(ProyectoGrupalApplication.class, args);
 
-        UsuarioServicio usuarioServicio = context.getBean(UsuarioServicio.class);
+        /*UsuarioServicio usuarioServicio = context.getBean(UsuarioServicio.class);
 
         // Crear un usuario
         Usuario nuevoUsuario = new Usuario();
@@ -34,6 +34,6 @@ public class ProyectoGrupalApplication {
         nuevoUsuario.setListaCursos(List.of(nuevoCurso));
 
         // Guardar el usuario (y el curso asociado) en la base de datos
-        usuarioServicio.crear(nuevoUsuario);
+        usuarioServicio.crear(nuevoUsuario);*/
     }
 }

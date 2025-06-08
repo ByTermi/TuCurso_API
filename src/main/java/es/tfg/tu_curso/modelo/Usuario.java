@@ -3,7 +3,8 @@ package es.tfg.tu_curso.modelo;
 import jakarta.persistence.*;
 
 import java.util.List;
-
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 public class Usuario {
@@ -19,9 +20,20 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Curso> listaCursos;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pomodoro> listaPomodoros;
 
+    // Relación Many-to-Many para lista de amigos
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "usuario_amigos",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "amigo_id")
+    )
+    private Set<Usuario> amigos = new HashSet<>();
+
+    // Constructores existentes
     public Usuario() {
     }
 
@@ -54,6 +66,26 @@ public class Usuario {
         this.listaPomodoros = listaPomodoros;
     }
 
+    // Métodos para gestionar amigos
+    public void agregarAmigo(Usuario amigo) {
+        if (amigo != null && !amigo.equals(this)) {
+            this.amigos.add(amigo);
+            amigo.getAmigos().add(this); // Relación bidireccional
+        }
+    }
+
+    public void removerAmigo(Usuario amigo) {
+        if (amigo != null) {
+            this.amigos.remove(amigo);
+            amigo.getAmigos().remove(this); // Relación bidireccional
+        }
+    }
+
+    public boolean esAmigo(Usuario usuario) {
+        return this.amigos.contains(usuario);
+    }
+
+    // Getters y Setters existentes
     public Long getId() {
         return id;
     }
@@ -77,8 +109,6 @@ public class Usuario {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-
-
 
     public String getEmail() {
         return email;
@@ -104,7 +134,6 @@ public class Usuario {
         this.icono = icono;
     }
 
-
     public String getRol() {
         return rol;
     }
@@ -127,5 +156,27 @@ public class Usuario {
 
     public void setListaPomodoros(List<Pomodoro> listaPomodoros) {
         this.listaPomodoros = listaPomodoros;
+    }
+
+    // Getter y Setter para amigos
+    public Set<Usuario> getAmigos() {
+        return amigos;
+    }
+
+    public void setAmigos(Set<Usuario> amigos) {
+        this.amigos = amigos;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Usuario usuario = (Usuario) obj;
+        return id != null && id.equals(usuario.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

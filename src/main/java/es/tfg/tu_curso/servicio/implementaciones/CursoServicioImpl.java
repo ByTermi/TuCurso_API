@@ -14,15 +14,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación del servicio de gestión de cursos.
+ * Proporciona la lógica de negocio para operaciones con cursos.
+ */
 @Service
 public class CursoServicioImpl implements CursoServicio {
 
+    /**
+     * Repositorio para acceder a los datos de cursos.
+     */
     @Autowired
     private RepositorioCurso cursosRepositorio;
 
+    /**
+     * Repositorio para acceder a los datos de usuarios.
+     */
     @Autowired
     private RepositorioUsuario usuarioRepositorio;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación verifica la existencia del usuario antes de crear el curso.
+     * </p>
+     */
     @Override
     public boolean crear(String nombre, String enlace, double precio, boolean finalizado, String anotaciones, Long usuarioId) {
         // Verificar si el usuario existe
@@ -45,6 +61,13 @@ public class CursoServicioImpl implements CursoServicio {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación verifica la existencia del usuario antes de crear el curso
+     * y establece el ID como nulo para asegurar la creación de un nuevo registro.
+     * </p>
+     */
     @Override
     public boolean crear(Curso curso, Long usuarioId) {
         // Verificar si el usuario existe
@@ -62,6 +85,12 @@ public class CursoServicioImpl implements CursoServicio {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación verifica la existencia del curso antes de eliminarlo.
+     * </p>
+     */
     @Override
     public boolean borrar(Long idCurso) {
         // Verificar si el curso existe
@@ -73,6 +102,13 @@ public class CursoServicioImpl implements CursoServicio {
         return false; // El curso no existe
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación verifica la existencia del curso y actualiza todos sus campos
+     * con los valores proporcionados.
+     * </p>
+     */
     @Override
     public boolean modificar(Long idCurso, Curso cursoActualizado) {
         // Verificar si el curso existe
@@ -94,24 +130,63 @@ public class CursoServicioImpl implements CursoServicio {
         return false; // El curso no existe
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación utiliza un método específico del repositorio para
+     * obtener directamente los DTO de curso.
+     * </p>
+     */
     @Override
     public List<CursoDTO> obtenerCursos() {
         return cursosRepositorio.findAllCursosDTO();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación utiliza un método específico del repositorio para
+     * obtener directamente los DTO de curso filtrados por usuario.
+     * </p>
+     */
     @Override
     public List<CursoDTO> obtenerCursosPorUsuario(Long usuarioId) {
         return cursosRepositorio.findCursosDTOByUsuarioId(usuarioId);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación convierte el modelo de curso a DTO si se encuentra.
+     * </p>
+     */
     @Override
     public Optional<CursoDTO> obtenerCursoPorId(Long idCurso) {
         Optional<Curso> curso = cursosRepositorio.findById(idCurso);
         return curso.map(CursoDTO::new);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación utiliza un método específico del repositorio para contar
+     * el número de cursos asociados a un usuario.
+     * </p>
+     */
     @Override
     public long contarCursosPorUsuario(Long usuarioId) {
         return cursosRepositorio.countByUsuarioId(usuarioId);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Esta implementación utiliza el método count() del repositorio
+     * para obtener el número total de cursos en el sistema.
+     * </p>
+     */
+    @Override
+    public long contarCursos() {
+        return cursosRepositorio.count();
     }
 }

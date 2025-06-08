@@ -10,43 +10,105 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repositorio para la entidad Curso.
+ * Proporciona métodos para realizar operaciones CRUD en la base de datos para los cursos
+ * y métodos de consulta personalizados.
+ */
 @Repository
 public interface RepositorioCurso extends JpaRepository<Curso, Long> {
-    // Buscar cursos por nombre (ignorando mayúsculas y minúsculas)
+    /**
+     * Encuentra cursos por su nombre ignorando mayúsculas y minúsculas.
+     *
+     * @param nombre El nombre del curso a buscar
+     * @return Lista de cursos que coinciden con el nombre especificado
+     */
     List<Curso> findByNombreIgnoreCase(String nombre);
 
-    // Buscar cursos por enlace
+    /**
+     * Encuentra cursos por su enlace.
+     *
+     * @param enlace El enlace del curso a buscar
+     * @return Lista de cursos que coinciden con el enlace especificado
+     */
     List<Curso> findByEnlace(String enlace);
 
-    // Buscar cursos que contengan una anotación específica
+    /**
+     * Encuentra cursos que contengan una anotación específica.
+     *
+     * @param anotaciones La anotación a buscar dentro de los cursos
+     * @return Lista de cursos que contienen la anotación especificada
+     */
     List<Curso> findByAnotacionesContaining(String anotaciones);
 
-    // Buscar cursos finalizados
+    /**
+     * Encuentra cursos que están marcados como finalizados.
+     *
+     * @return Lista de cursos finalizados
+     */
     List<Curso> findByFinalizadoTrue();
 
-    // Buscar cursos no finalizados
+    /**
+     * Encuentra cursos que no están marcados como finalizados.
+     *
+     * @return Lista de cursos no finalizados
+     */
     List<Curso> findByFinalizadoFalse();
 
-    // Buscar cursos por precio menor que un valor
+    /**
+     * Encuentra cursos con un precio menor que el valor especificado.
+     *
+     * @param precio El precio máximo para filtrar los cursos
+     * @return Lista de cursos con precio menor que el especificado
+     */
     List<Curso> findByPrecioLessThan(double precio);
 
-    // Buscar cursos por precio mayor que un valor
+    /**
+     * Encuentra cursos con un precio mayor que el valor especificado.
+     *
+     * @param precio El precio mínimo para filtrar los cursos
+     * @return Lista de cursos con precio mayor que el especificado
+     */
     List<Curso> findByPrecioGreaterThan(double precio);
 
-    // Buscar cursos por usuario
+    /**
+     * Encuentra cursos asociados a un usuario específico.
+     *
+     * @param usuario El usuario cuyo cursos se desean encontrar
+     * @return Lista de cursos asociados al usuario especificado
+     */
     List<Curso> findByUsuario(Usuario usuario);
 
-    // Buscar cursos por ID de usuario
+    /**
+     * Encuentra cursos asociados a un usuario por su ID.
+     *
+     * @param usuarioId El ID del usuario cuyos cursos se desean encontrar
+     * @return Lista de cursos asociados al ID de usuario especificado
+     */
     List<Curso> findByUsuarioId(Long usuarioId);
 
-    // Contar cursos por usuario
+    /**
+     * Cuenta el número de cursos asociados a un usuario específico.
+     *
+     * @param usuarioId El ID del usuario para el que se desea contar los cursos
+     * @return El número de cursos asociados al usuario especificado
+     */
     long countByUsuarioId(Long usuarioId);
 
-    // Query personalizada para obtener todos los CursoDTO
+    /**
+     * Obtiene todos los cursos en formato DTO.
+     *
+     * @return Lista de todos los cursos en formato DTO
+     */
     @Query("SELECT new es.tfg.tu_curso.dto.CursoDTO(c.id, c.nombre, c.enlace, c.precio, c.finalizado, c.anotaciones, c.usuario.id) FROM Curso c")
     List<CursoDTO> findAllCursosDTO();
 
-    // Query para obtener los CursoDTO de un usuario específico
+    /**
+     * Obtiene los cursos en formato DTO asociados a un usuario específico.
+     *
+     * @param usuarioId El ID del usuario cuyos cursos se desean obtener
+     * @return Lista de cursos en formato DTO asociados al usuario especificado
+     */
     @Query("SELECT new es.tfg.tu_curso.dto.CursoDTO(c.id, c.nombre, c.enlace, c.precio, c.finalizado, c.anotaciones, c.usuario.id) FROM Curso c WHERE c.usuario.id = :usuarioId")
     List<CursoDTO> findCursosDTOByUsuarioId(@Param("usuarioId") Long usuarioId);
 }
