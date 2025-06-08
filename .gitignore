@@ -34,7 +34,7 @@ build/
 
 
 ### CREDENCIALES SPRINGBOOT ###
-src/main/resources/application.properties
+#src/main/resources/application.properties
 
 ### base de datos ###
-data/**
+#data/**
