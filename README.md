@@ -43,6 +43,9 @@ El proyecto utiliza H2 como base de datos con las siguientes configuraciones:
 ## Ejecución Local
 
 1. Clonar repositorio
-2. Ejecutar:
+2. Cambiar puerto si es necesario
+3. Ejecutar proyecto:
+  - Desde IntelliJ IDEA: Buscar clase principal con @SpringBootApplication y hacer clic en el botón ▶ (Run)
+  - Desde CMD/PowerShell usando wrapper Maven:
 ```bash
-mvn spring-boot:run
+.\mvnw.cmd spring-boot:run
